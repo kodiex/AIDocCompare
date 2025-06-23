@@ -58,7 +58,7 @@ def AIFile(req: func.HttpRequest) -> func.HttpResponse:
             )
 
         # Correct OpenAI client usage
-        openai_client = OpenAI(api_key="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")
+        openai_client = OpenAI()
         
 
        
