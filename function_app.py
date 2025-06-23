@@ -46,7 +46,7 @@ def AIFile(req: func.HttpRequest) -> func.HttpResponse:
 
         if not question:
             return func.HttpResponse(
-                "Missing 'question' parameter in request body.",
+                "Missing 'question' parameter.",
                 status_code=400
             )
 
