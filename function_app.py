@@ -4,13 +4,15 @@ from openai import OpenAI
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
-@app.route(route="ComparePDF")
-def ComparePDF(req: func.HttpRequest) -> func.HttpResponse:
+@app.route(route="AIFile")
+def AIFile(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Processing Base64-encoded file.')
 
     try:
         # Get the Base64-encoded file from the request
         base64_file = req.params.get('file')
+        sysprompt = req.params.get('sysprompt')
+        question = req.params.get('question')
         
         # Handle file parameter in POST request
         if not base64_file:
@@ -30,6 +32,31 @@ def ComparePDF(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=400
             )
 
+        # Handle missing 'question' parameter
+        if not question:
+            try:
+                req_body = req.get_json()
+            except ValueError:
+                return func.HttpResponse(
+                    "Invalid JSON in request body.",
+                    status_code=400
+                )
+            else:
+                question = req_body.get('question')
+
+        if not question:
+            return func.HttpResponse(
+                "Missing 'question' parameter in request body.",
+                status_code=400
+            )
+
+        # Handle missing 'sysprompt' parameter
+        if not sysprompt:
+            return func.HttpResponse(
+                "Missing 'sysprompt' parameter.",
+                status_code=400
+            )
+
         # Correct OpenAI client usage
         openai_client = OpenAI(api_key="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")
         
@@ -38,6 +65,11 @@ def ComparePDF(req: func.HttpRequest) -> func.HttpResponse:
         completion = openai_client.chat.completions.create(
             model="gpt-4.1",
             messages=[
+                {
+                    "role": "system",
+                    "content": sysprompt,
+
+                },
                 {
                     "role": "user",
                     "content": [
@@ -48,17 +80,19 @@ def ComparePDF(req: func.HttpRequest) -> func.HttpResponse:
                                 "file_data": f"data:application/pdf;base64,{base64_file}",
                             }
                         },
-                        {
+                       {
                             "type": "text",
-                            "text": "What is the first dragon in the book?",
-                        }
+                            "text": question,
+                        },
                     ],
+                    
                 },
             ],
+            response_format={ "type": "json_object" }  # Enforce JSON response
         )
 
         return func.HttpResponse(
-            f"File sent to OpenAI successfully. Response: {completion.choices[0].message.content}",
+            f"{completion.choices[0].message.content}",
             status_code=200
         )
        

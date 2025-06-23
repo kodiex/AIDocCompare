@@ -1,6 +1,20 @@
 {
     "version": "0.2.0",
     "configurations": [
+       
+
+        {
+            "name": ".NET Core Launch (console)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/client/bin/Debug/net6.0/AIDocCompare.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+
         {
             "name": "Attach to Python Functions",
             "type": "debugpy",
